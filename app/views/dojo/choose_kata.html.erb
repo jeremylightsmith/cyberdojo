@@ -1,28 +1,3 @@
-
-<script language="JavaScript"><!--
-function choose_kata(id)
-{
-  $('kata_id').value = id;
-  document.chooseKata.submit();
-}
-//--></script>
-
-<form name="chooseKata" action="/dojo/choose_avatar">
-
-<input readonly 
-       type="hidden"
-       name="dojo_id" 
-       id="dojo_id" 
-       type="text" 
-       value="<%=h @dojo_id-%>">
-
-<input readonly 
-       type="hidden"
-       name="kata_id" 
-       id="kata_id" 
-       type="text" 
-       value="<%=h @kata_id-%>">
-
 <h2><b>Select your kata</b></h2>
 
 <table cellspacing="4" 
@@ -30,14 +5,8 @@ function choose_kata(id)
   <% @katas.sort.each do |kata| -%>
   <tr>
     <td>
-      <input type="button" 
-             onClick='choose_kata("<%=kata-%>");'
-             value="<%=kata-%>">
+      <%= button_to kata, "/dojo/choose_avatar?dojo_id=#{@dojo_id}&kata_id=#{kata}" %>
     </td>
   </tr>
   <% end -%>
 </table>
-
-</form>
-
-

@@ -10,35 +10,37 @@ function getCaretPos(control)
 {
   var caretPos = 0;
   // IE Support
-  if (document.selection) 
-  {
-    control.focus();
-    var sel = document.selection.createRange();
-    sel.moveStart('character', -control.value.length);
-    caretPos = sel.text.length;
-  }
-  // Firefox support
-  else if (control.selectionStart || control.selectionStart == '0')
-    caretPos = control.selectionStart;
+  // todo - put back jeremy
+  // if (document.selection) 
+  // {
+  //   control.focus();
+  //   var sel = document.selection.createRange();
+  //   sel.moveStart('character', -control.value.length);
+  //   caretPos = sel.text.length;
+  // }
+  // // Firefox support
+  // else if (control.selectionStart || control.selectionStart == '0')
+  //   caretPos = control.selectionStart;
 
   return caretPos;
 }
 
 function setCaretPos(control, pos)
 {
-  if (control.setSelectionRange)
-  {
-    control.focus();
-    control.setSelectionRange(pos, pos);
-  }
-  else if (ctrl.createTextRange) 
-  {
-    var range = control.createTextRange();
-    range.collapse(true);
-    range.moveEnd('character', pos);
-    range.moveStart('character', pos);
-    range.select();
-  }
+  // todo - put back jeremy
+  // if (control.setSelectionRange)
+  // {
+  //   control.focus();
+  //   control.setSelectionRange(pos, pos);
+  // }
+  // else if (control.createTextRange) 
+  // {
+  //   var range = control.createTextRange();
+  //   range.collapse(true);
+  //   range.moveEnd('character', pos);
+  //   range.moveStart('character', pos);
+  //   range.select();
+  // }
 }
 
 function createTextAreaWithLineNumbers(id, tab)
@@ -85,11 +87,6 @@ function createTextAreaWithLineNumbers(id, tab)
   }
 }
 
-function trim(stringToTrim) 
-{
-  return stringToTrim.replace(/^\s+|\s+$/g,"");
-}
-
 function getFilenameTr(filename)
 {
   var input = document.getElementById('radio_' + filename);
@@ -99,15 +96,13 @@ function getFilenameTr(filename)
   return tr;
 }
 
-function renameFile(event)
+function renameFile(filename)
 {
-  var filename = firstElement(event.element()).getAttribute('value');
-
   // Save editor into its hidden textarea so we can
   // just use hidden textareas in code below
-  $(current_filename).value = $('editor').value;
+  $(current_filename).val($('#editor').val());
 
-  var newname = trim(prompt("Rename " + filename + " to: ", ""));
+  var newname = prompt("Rename " + filename + " to: ", "").trim();
   if (newname == null)
     return; // Cancelled
 
@@ -128,29 +123,18 @@ function renameFile(event)
   }
 
   // rename hidden textarea by appending new one...
-  var new_ta = new Element("textarea", { id:newname, name:newname });
-  new_ta.value = $(filename).value;
-  $('visible_files_container').appendChild(new_ta);
+  var old_ta = $(document.getElementById(filename));
+  old_ta.attr("id", newname);
 
-  //... and removing old one
-  var old_ta = $(filename);
-  // BUG: the following line kills the functionality of selecting a file from the 
-  // filelist. However, leaving the line in might be useful. Suppose you accidentally
-  // delete a file. If it was still available you might be able to reload it by
-  // recreating it.
-  //$('visible_files_container').removeChild(old_ta);
-
-  // change name in $('visible_filenames_container')
-  var current = $('visible_filenames_container').value;
+  // change name in $('#visible_filenames_container')
+  var current = $('#visible_filenames_container').val();
   current = current.replace(';'+filename+";", ";"+newname+";");
-  $('visible_filenames_container').value = current;
+  $('#visible_filenames_container').val(current);
 
   // change name in file-list
-  var tr = getFilenameTr(filename);
-  var tbody = tr.parentNode;
-  tbody.removeChild(tr);
-  tbody.appendChild(makeFileListEntry(newname));
-  sortFileList();
+  $(document.getElementById("file_row_" + filename)).remove();
+  addFilenameToList(newname);
+
   // if we are renaming the current file then reselect in the file-list
   if (filename == current_filename)
   {
@@ -161,25 +145,21 @@ function renameFile(event)
   setupFileEntryMenu();
 }
 
-function deleteFile(event)
+function deleteFile(filename)
 {
-  var filename = firstElement(event.element()).getAttribute('value');
-
   if (!confirm("Click OK to delete " + filename))
     return; // Cancelled
 
   // remove from file-list 
-  var tr = getFilenameTr(filename);
-  var tbody = tr.parentNode;
-  tbody.removeChild(tr);
+  $(document.getElementById("file_row_" + filename)).remove();
 
   // remove hidden textarea
-  $('visible_files_container').removeChild($(filename));
+  $(document.getElementById(filename)).remove();
 
   // remove from visible_filenames_container
-  var current = $('visible_filenames_container').value;
+  var current = $('#visible_filenames_container').val();
   current = current.replace(';'+filename+";", ";");
-  $('visible_filenames_container').value = current;
+  $('#visible_filenames_container').val(current);
 
   // if deleted file is current file then load kata.sh
   // which is always available as it cannot be renamed or deleted
@@ -191,7 +171,7 @@ function deleteFile(event)
   }
 }
 
-document.observe('dom:loaded', function() {
+$(function() {
   <% if !@kata.readonly -%>
     setupFileEntryMenu();
   <% end -%>
@@ -200,24 +180,19 @@ document.observe('dom:loaded', function() {
 
 function setupFileEntryMenu()
 {
-  var fileEntryMenuItems = [
-    {
-      name: 'Rename this file...  ',
-      className: 'rename-this-file', 
-      callback: function(e) { renameFile(e); }
-    },{
-      name: 'Delete this file...  ', 
-      className: 'delete-this-file',
-      callback: function(e) { deleteFile(e); }
-    }
-  ]
-
-  new Proto.Menu({
-    selector: '#radioFilename', 
-    className: 'menu desktop', // (can be used for css styling)
-    menuItems: fileEntryMenuItems
-  })
-
+  $("#file-list label").contextMenu({
+      menu: "file_menu"
+  }, function(action, element, pos) {
+    console.debug("fire", action, element, pos)
+      switch(action) {
+        case "rename":
+          renameFile(element.html());
+          break;
+        case "delete":
+          deleteFile(element.html());
+          break;
+      }    
+  });
 }
 
 var current_filename = false;
@@ -226,22 +201,24 @@ function saveCurrentFile()
 {
   if (current_filename) 
   {
-    $(current_filename).value = $('editor').value;
+    var current = $('#editor').val();
+    $(document.getElementById(current_filename)).val(current);
     // Save cursor position
     var pos = getCaretPos(document.getElementById('editor'));
     var ta = $(current_filename);
-    ta.setAttribute('cursorPos', pos);
+    ta.attr('cursorPos', pos);
   }
 }
 
 function loadFile(name)
 {
+  console.debug("load file called w/ " + name)
   saveCurrentFile();
-  var saved = $(name);
-  var editor = $('editor');
-  editor.value = saved.value;
+  var saved = $(document.getElementById(name));  // file name may have dots and cause jquery to barf
+  var editor = $('#editor');
+  editor.val(saved.val());
   // Set cursor position
-  var pos = saved.getAttribute('cursorPos');
+  var pos = saved.attr('cursorPos');
   setCaretPos(editor, pos);
 
   current_filename = name;
@@ -251,31 +228,12 @@ function loadFile(name)
 function preRunTests()
 {
   saveCurrentFile();
-  Element.show('run_tests_spinner');
+  $('#run_tests_spinner').show();
 }
 
 function postRunTests()
 {
-   Element.hide('run_tests_spinner');
-}
-
-function makeFileListEntry(filename)
-{
-  // assert(filename != kata.sh)
-
-  var div = new Element("div", { id:"radioFilename" });
-  div.title = "Right-click=rename/delete";
-  div.onclick = new Function("loadFile('" + filename + "')");
-  var inp = new Element("input", 
-    { id:"radio_" + filename, name:"radio_filename", type:"radio", value:filename });
-  div.appendChild(inp);
-  div.appendChild(document.createTextNode(filename));
-  var td = new Element("td");
-  td.appendChild(div);
-  var tr = new Element("tr");
-  tr.appendChild(td);
-
-  return tr;
+   $('#run_tests_spinner').hide();
 }
 
 function isElement(n)
@@ -295,51 +253,57 @@ function firstElement(e)
   return null;
 }
 
-function nameOf(e)
+function compare(left, right) 
 {
-  var td = firstElement(e);
-  var div = firstElement(td);
-  var inp = firstElement(div);
-  return inp.getAttribute("value"); 
+  left = left.toLowerCase();
+  right = right.toLowerCase();
+  if (left < right)
+    return -1;
+  else if (left > right)
+    return 1;
+  else
+    return 0; // should never happen!
 }
 
 function sortFileList()
 {
-  var list = $('file-list');
-  var items = list.childNodes;
-  var array = [];
+  var list = $('#file-list')
+  var rows = list.find('tr');
 
-  for (var i in items)
-  {
-    var item = items[i];
-    if (isElement(item))
-      array.push(item);
-  }
-
-  array.sort(function(lhs,rhs) {
-    var lhs_name = nameOf(lhs);
-    var rhs_name = nameOf(rhs);
-    if (lhs_name < rhs_name)
-      return -1;
-    else if (lhs_name > rhs_name)
-      return 1;
-    else
-      return 0; // should never happen!
+  rows.sort(function(left,right) {
+    return compare($(left).find('label').html(), $(right).find('label').html());
   });
 
-  for (i = 0; i != array.length; i++)
-    list.appendChild(array[i]);
+  rows.each(function() {
+    list.append(this);
+  })
 }
 
 function fileAlreadyExists(filename)
 {
-  var filenames = trim($('visible_filenames_container').value);
+  var filenames = $('#visible_filenames_container').val().trim();
   return filenames.split(";").indexOf(filename) != -1;
+}
+
+function addFilenameToList(filename)
+{
+  $('#file-list').append(
+    $('<tr/>').attr("id", "file_row_" + filename).append(
+      $('<td/>').append(
+        $('<div id="radioFilename" title="Right-click=rename/delete"/>')
+          .click(function() { loadFile(filename); })
+          .append($('<input type="radio"/>').attr({
+            id:"radio_" + filename, 
+            name:"radio_filename", 
+            value:filename }))
+          .append("<label>" + filename + "</label>"))));
+
+  sortFileList();
 }
 
 function newFile()
 {
-  var filename = trim(prompt("Enter the new file's name: ", ""));
+  var filename = prompt("Enter the new file's name: ", "").trim();
   if (filename == null)
     return; // Cancelled
 
@@ -358,19 +322,15 @@ function newFile()
   }
 
   // Create new hidden textarea (to save to before submitting)
-  var ta = new Element("textarea", { id:filename, name:filename });
-  $('visible_files_container').appendChild(ta);
-
+  $('#visible_files_container').append($('<textarea/>').attr({id:filename, name:filename}));
+  
   // Make the new filename visible in the file-manager list
-  $('file-list').appendChild(makeFileListEntry(filename));
-  sortFileList();
-
+  addFilenameToList(filename);
+  
   // Make its name available to rails
-  var filenames = trim($('visible_filenames_container').value);
-  filenames += filename;
-  filenames += ";";
-  $('visible_filenames_container').value = filenames;
-
+  var filenames = $('#visible_filenames_container').val().trim() + filename + ";";
+  $('#visible_filenames_container').val(filenames);
+  
   setupFileEntryMenu();
 }
 

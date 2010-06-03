@@ -1,3 +1,11 @@
+<ul id="file_menu" class="contextMenu">
+  <li class="rename">
+    <a href="#rename">Rename</a>
+  </li>
+  <li class="delete separator">
+    <a href="#delete">Delete</a>
+  </li>
+</ul>
 
 <table>
   <% if !@kata.readonly -%>
@@ -6,8 +14,8 @@
     <tbody>       
   <% end -%>
 
-    <% @manifest[:visible_files].sort.each do |filename,file| -%>
-    <tr>
+    <% @manifest[:visible_files].sort_by{|name| name[0].downcase}.each do |filename,file| -%>
+    <tr id="file_row_<%= filename %>">
       <td>             
         <div <% if filename != 'kata.sh' -%>
                 id="radioFilename"  
@@ -17,7 +25,7 @@
           <input id="radio_<%=filename-%>" 
                  name="radio_filename"
                  type="radio"
-                 value="<%=filename-%>"><%= filename -%>
+                 value="<%=filename-%>"><label><%= filename -%></label>
         </div>
       </td>
     </tr>

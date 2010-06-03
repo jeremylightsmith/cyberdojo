@@ -30,12 +30,13 @@ var TabEntry = new function() {
 			inp.tabEntryCheckbox = chk;
 		}
 		if (inp.selectionStart) {
-			Event.observe(inp, 'keydown', downTab);
-			Event.observe(inp, 'keyup', upTab);
-			Event.observe(inp, 'keypress', checkTab);
+		  // todo - reimplement - jeremy
+      // Event.observe(inp, 'keydown', downTab);
+      // Event.observe(inp, 'keyup', upTab);
+      // Event.observe(inp, 'keypress', checkTab);
 		} else {
-			Event.observe(inp, 'keydown', downTab);
-			Event.observe(inp, 'keyup', checkTab);
+      // Event.observe(inp, 'keydown', downTab);
+      // Event.observe(inp, 'keyup', checkTab);
 		}
 	}
 	var downTab = function(evt) {

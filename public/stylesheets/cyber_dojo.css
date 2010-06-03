@@ -1,11 +1,21 @@
 
 #cyber_dojo_page
 {
-  margin-top: 0em;
-  margin-left: 1em;
+  margin: 0;
+  padding: 0;
   border-style: none;
-  background-color: #FFE4C4; /*bisque*/
+  background-color: #333;
   color: green;
+  text-align: center;
+}
+
+#content {
+  text-align: left;
+  margin: 0 auto;
+  padding: 0.5em 1em 5em;
+  background-color: #FFE4C4; /*bisque*/
+  width: 1100px;
+  position: relative;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -34,7 +44,10 @@
   font-size: 14pt;
 }
 
-
+#increments td
+{
+  vertical-align: middle; 
+}
 
 .failed  { background-color: #F33; }
 .passed  { background-color: #3C3; }
@@ -47,9 +60,10 @@
  */
 #inc.increment
 {
-  position: relative; /*this is the key*/
   z-index: 24; 
   text-decoration: none;
+  width: 8px;
+  cursor: help;
 }
 
 #inc.increment:hover { z-index: 25; }
@@ -58,10 +72,11 @@
 
 #inc.increment:hover span /*the span will display just on :hover state*/
 {
+  z-index: 24; 
   font-family: monospace;
   font-size: 9pt;
   display: block;
-  position: fixed;
+  position: absolute;
   top: 5em; left: 2em; width: auto;
   border: 1px solid #0CF;
   background-color: #CFF; 
@@ -86,6 +101,10 @@
   background-color: #FEF5CA;
   color: #686868;   
   font-size: 12pt; 
+  float: left;
+  margin-top: 0 !important;
+  width: 190px;
+  overflow: auto;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -125,5 +144,4 @@
   visibility: hidden; 
   display: none; 
 }
-
 

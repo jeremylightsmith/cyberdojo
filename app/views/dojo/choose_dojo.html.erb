@@ -1,27 +1,3 @@
-
-<script language="JavaScript"><!--
-function select_dojo(id)
-{
-  $('dojo_id').value = id;
-  document.chooseDojo.submit();
-}
-//--></script>
-
-<form name="chooseDojo" action="/dojo/choose_kata">
-
-<noscript>
-  &nbsp;
-  <h2><b>You must enable JavaScript.</b></h2>
-  &nbsp;
-</noscript>
-
-<input readonly 
-       type="hidden"
-       name="dojo_id" 
-       id="dojo_id" 
-       type="text" 
-       value="<%=h @dojo_id-%>">
-
 <h2><b>Enter your dojo</b></h2>
 
 <table cellspacing="4" 
@@ -29,14 +5,8 @@ function select_dojo(id)
   <% @dojos.sort.each do |dojo| -%>
   <tr>
     <td>
-      <input type="button" 
-             onClick='select_dojo("<%=dojo-%>");'
-             value="<%=dojo-%>">
+      <%= button_to dojo, "/dojo/choose_kata?dojo_id=#{dojo}" %>
     </td>
   </tr>
   <% end -%>
 </table>
-
-</form>
-
-
