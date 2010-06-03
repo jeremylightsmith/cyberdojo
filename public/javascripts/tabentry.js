@@ -1,72 +1,68 @@
-/***********************************************************
-	TabEntry Library
-
-	Required files:
-	* selrange.js (http://dev.castwide.com)
-	* prototype.js (http://prototypejs.org)
-
-	Author: Fred Snyder
-	Company: Castwide Technologies
-	URL: http://castwide.com
-	Date Created: July 3, 2008
-	Last Updated: August 15, 2008
-
-	8-15-2008	Fixed scrolling
-
-	This file is freely distributable under an MIT license.
-	The above copyright notice and this permission notice
-	shall be included in all copies or substantial portions
-	of the software.
-	See http://dev.castwide.com for further details.
-
-***********************************************************/
-
 var TabEntry = new function() {
-	this.enable = function(inp, chk) {
-		if (!inp) return;
-		inp = $(inp);
-		if (chk) {
-			chk = $(chk);
-			inp.tabEntryCheckbox = chk;
-		}
-		if (inp.selectionStart) {
-		  // todo - reimplement - jeremy
-      // Event.observe(inp, 'keydown', downTab);
-      // Event.observe(inp, 'keyup', upTab);
-      // Event.observe(inp, 'keypress', checkTab);
-		} else {
-      // Event.observe(inp, 'keydown', downTab);
-      // Event.observe(inp, 'keyup', checkTab);
-		}
+	this.enable = function(id) {
+		input = $("#" + id);
+		
+		input.keydown(function(e) {
+		  if (e.keyCode == 9) {
+		    insertAtCursor(input[0], "    ");
+		    return false;
+		  }
+		})
+    //    var downTab = function(evt) {
+    //      if (evt.keyCode == 9) {
+    //        return false;
+    //      }
+    //    }
+    //    var upTab = function(evt) {
+    //      if (evt.keyCode == 9) {
+    //        return false;
+    //      }
+    //    }
+    //    var checkTab = function(evt) {
+    //      if (evt.keyCode == 9) {
+    //        var top = input.scrollTop;
+    //         // SelectionRange.insert(input, input.tab);
+    //        input.scrollTop = top;
+    //        return false;
+    //      }
+    //    }
+    // 
+    // if (input.selectionStart) {
+    //   input.keydown(downTab);
+    //   input.keyup(upTab);
+    //   input.keypress(checkTab);
+    // } else {
+    //   input.keydown(downTab);
+    //   input.keyup(checkTab);
+    // }
 	}
-	var downTab = function(evt) {
-		var input = Event.element(evt);
-		if ( (input.tabEntryCheckbox) && (input.tabEntryCheckbox.checked == false) ) {
-			return;
-		}
-		if (evt.keyCode == 9) {
-			Event.stop(evt);
-		}
-	}
-	var upTab = function(evt) {
-		var input = Event.element(evt);
-		if ( (input.tabEntryCheckbox) && (input.tabEntryCheckbox.checked == false) ) {
-			return;
-		}
-		if (evt.keyCode == 9) {
-			Event.stop(evt);
-		}
-	}
-	var checkTab = function(evt) {
-		var input = Event.element(evt);
-		if ( (input.tabEntryCheckbox) && (input.tabEntryCheckbox.checked == false) ) {
-			return;
-		}
-		if (evt.keyCode == 9) {
-			var top = input.scrollTop;
-			SelectionRange.insert(input, input.tab);
-			Event.stop(evt);
-			input.scrollTop = top;
-		}
-	}
+}
+
+//http://alexking.org/blog/2003/06/02/inserting-at-the-cursor-using-javascript#comment-3817
+function insertAtCursor(myField, myValue) {
+  //IE support
+  if (document.selection) {
+    var temp;
+    myField.focus();
+    sel = document.selection.createRange();
+    temp = sel.text.length;
+    sel.text = myValue;
+    if (myValue.length == 0) {
+      sel.moveStart('character', myValue.length);
+      sel.moveEnd('character', myValue.length);
+    } else {
+      sel.moveStart('character', -myValue.length + temp);
+    }
+    sel.select();
+  }
+  //MOZILLA/NETSCAPE support
+  else if (myField.selectionStart || myField.selectionStart == '0') {
+    var startPos = myField.selectionStart;
+    var endPos = myField.selectionEnd;
+    myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos, myField.value.length);
+    myField.selectionStart = startPos + myValue.length;
+    myField.selectionEnd = startPos + myValue.length;
+  } else {
+    myField.value += myValue;
+  }
 }
